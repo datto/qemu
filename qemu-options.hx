@@ -3047,6 +3047,26 @@ Enable KVM full virtualization support. This option is only available
 if KVM support is enabled when compiling.
 ETEXI
 
+DEF("shim", HAS_ARG, QEMU_OPTION_shim, \
+    "-shim [dbus-object=<obj>][,dbus-path=<path>]\n"
+    "      enable RDPMux integration features\n", QEMU_ARCH_ALL)
+STEXI
+@item -shim @var{option}[,@var{option}]
+@findex -shim
+Enable RDPMux shim integration features. This option only makes sense when used
+with an RDPMux server. Valid options are
+
+@table @option
+
+@item dbus-path=<path>
+The well-known name of the RDPMux server on the system bus.
+
+@item dbus-object=<obj>
+The object path to the main RDPMux dbus object.
+
+@end table
+ETEXI
+
 DEF("xen-domid", HAS_ARG, QEMU_OPTION_xen_domid,
     "-xen-domid id   specify xen guest domain id\n", QEMU_ARCH_ALL)
 DEF("xen-create", 0, QEMU_OPTION_xen_create,

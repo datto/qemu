@@ -116,6 +116,7 @@ int main(int argc, char **argv)
 #include "qemu/osdep.h"
 
 #include "ui/qemu-spice.h"
+#include "ui/qemu-shim.h"
 #include "qapi/string-input-visitor.h"
 #include "qapi/opts-visitor.h"
 #include "qom/object_interfaces.h"
@@ -193,6 +194,7 @@ int icount_align_option;
  */
 uint8_t qemu_uuid[16];
 bool qemu_uuid_set;
+bool using_shim = false;
 
 static NotifierList exit_notifiers =
     NOTIFIER_LIST_INITIALIZER(exit_notifiers);
@@ -4017,6 +4019,18 @@ int main(int argc, char **argv, char **envp)
                     exit(1);
                 }
                 break;
+            case QEMU_OPTION_shim:
+                olist = qemu_find_opts("shim");
+                if (!olist) {
+                    error_report("RDPMux support has been disabled");
+                    exit(1);
+                }
+                opts = qemu_opts_parse_noisily(olist, optarg, false);
+                if (!opts) {
+                    exit(1);
+                }
+                using_shim = true;
+                break;
             default:
                 os_parse_cmd_args(popt->index, optarg);
             }
@@ -4620,6 +4634,13 @@ int main(int argc, char **argv, char **envp)
 #ifdef CONFIG_SPICE
     if (using_spice) {
         qemu_spice_display_init();
+    }
+#endif
+
+printf("DEBUG: Initializing shim code! If the ifdef went through, it should be here.\n");
+#ifdef CONFIG_SHIM
+    if (using_shim) {
+        shim_qemu_init();
     }
 #endif
 
