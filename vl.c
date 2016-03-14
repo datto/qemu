@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 #include "sysemu/arch_init.h"
 
 #include "ui/qemu-spice.h"
-#include "ui/qemu-shim.h"
+#include "ui/qemu-rdpmux.h"
 #include "qapi/string-input-visitor.h"
 #include "qapi/opts-visitor.h"
 #include "qom/object_interfaces.h"
@@ -188,7 +188,7 @@ int icount_align_option;
  */
 uint8_t qemu_uuid[16];
 bool qemu_uuid_set;
-bool using_shim = false;
+bool using_mux = false;
 
 static NotifierList exit_notifiers =
     NOTIFIER_LIST_INITIALIZER(exit_notifiers);
@@ -4019,8 +4019,8 @@ int main(int argc, char **argv, char **envp)
                     exit(1);
                 }
                 break;
-            case QEMU_OPTION_shim:
-                olist = qemu_find_opts("shim");
+            case QEMU_OPTION_mux:
+                olist = qemu_find_opts("mux");
                 if (!olist) {
                     error_report("RDPMux support has been disabled");
                     exit(1);
@@ -4029,7 +4029,7 @@ int main(int argc, char **argv, char **envp)
                 if (!opts) {
                     exit(1);
                 }
-                using_shim = true;
+                using_mux = true;
                 break;
             default:
                 os_parse_cmd_args(popt->index, optarg);
@@ -4617,10 +4617,9 @@ int main(int argc, char **argv, char **envp)
                       input_linux_init, NULL, &error_fatal);
 #endif
 
-printf("DEBUG: Initializing shim code! If the ifdef went through, it should be here.\n");
-#ifdef CONFIG_SHIM
-    if (using_shim) {
-        shim_qemu_init();
+#ifdef CONFIG_MUX
+    if (using_mux) {
+        mux_qemu_init();
     }
 #endif
 

@@ -316,7 +316,7 @@ vhdx=""
 numa=""
 tcmalloc="no"
 jemalloc="no"
-shim="no"
+mux="no"
 
 # parse CC options first
 for opt do
@@ -1144,9 +1144,9 @@ for opt do
   ;;
   --enable-jemalloc) jemalloc="yes"
   ;;
-  --disable-shim) shim="no"
+  --disable-mux) mux="no"
   ;;
-  --enable-shim) shim="yes"
+  --enable-mux) mux="yes"
   ;;
   *)
       echo "ERROR: unknown option $opt"
@@ -3942,26 +3942,24 @@ EOF
   fi
 fi
 
-# shim probe
-if test "$shim" != "no"; then
+# librdpmux probe
+if test "$mux" != "no"; then
     cat > $TMPC << EOF
-#include <shim.h>
-int main() { ShimDisplay *d = shim_init_display_struct(); return 0; }
+#include <rdpmux.h>
+int main() { MuxDisplay *d = mux_init_display_struct(); return 0; }
 EOF
-    shim_cflags=$($pkg_config --cflags librdpmux 2>/dev/null)
-    shim_libs=$($pkg_config --libs librdpmux 2>/dev/null)
-    echo "shim_cflags is $shim_cflags"
-    echo "shim_libs is $shim_libs"
-    if compile_prog "$shim_cflags" "$shim_libs" ; then
-        shim="yes"
-        libs_softmmu="$libs_softmmu $shim_libs"
-        QEMU_CFLAGS="$QEMU_CFLAGS $shim_cflags"
+    mux_cflags=$($pkg_config --cflags librdpmux 2>/dev/null)
+    mux_libs=$($pkg_config --libs librdpmux 2>/dev/null)
+    if compile_prog "$mux_cflags" "$mux_libs" ; then
+        mux="yes"
+        libs_softmmu="$libs_softmmu $mux_libs"
+        QEMU_CFLAGS="$QEMU_CFLAGS $mux_cflags"
     else
-        if test "$shim" = "yes" ; then
-            feature_not_found "shim" \
-                "Install libshim-devel"
+        if test "$mux" = "yes" ; then
+            feature_not_found "mux" \
+                "Install librdpmux-devel"
         fi
-        shim="no"
+        mux="no"
     fi
 fi
 
@@ -4804,7 +4802,7 @@ echo "spice support     $spice ($spice_protocol_version/$spice_server_version)"
 else
 echo "spice support     $spice"
 fi
-echo "shim support      $shim"
+echo "mux support       $mux"
 echo "rbd support       $rbd"
 echo "xfsctl support    $xfs"
 echo "smartcard support $smartcard"
@@ -5125,8 +5123,8 @@ fi
 if test "$gcrypt" = "yes" ; then
   echo "CONFIG_GCRYPT=y" >> $config_host_mak
 fi
-if test "$shim" = "yes" ; then
-    echo "CONFIG_SHIM=y" >> $config_host_mak
+if test "$mux" = "yes" ; then
+    echo "CONFIG_MUX=y" >> $config_host_mak
 fi
 if test "$nettle" = "yes" ; then
   echo "CONFIG_NETTLE=y" >> $config_host_mak
