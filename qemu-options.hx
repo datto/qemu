@@ -3047,14 +3047,14 @@ Enable KVM full virtualization support. This option is only available
 if KVM support is enabled when compiling.
 ETEXI
 
-DEF("shim", HAS_ARG, QEMU_OPTION_shim, \
-    "-shim [dbus-object=<obj>][,dbus-path=<path>]\n"
+DEF("mux", HAS_ARG, QEMU_OPTION_mux, \
+    "-mux [dbus-object=<obj>][,dbus-path=<path>]\n"
     "      enable RDPMux integration features\n", QEMU_ARCH_ALL)
 STEXI
-@item -shim @var{option}[,@var{option}]
-@findex -shim
-Enable RDPMux shim integration features. This option only makes sense when used
-with an RDPMux server. Valid options are
+@item -mux @var{option}[,@var{option}]
+@findex -mux
+Enable librdpmux integration. This option only makes sense when used with an 
+RDPMux server. Valid options are
 
 @table @option
 
