@@ -34,6 +34,31 @@ static QemuOptsList qemu_mux_opts = {
 
 static QemuMuxDisplay *display;
 
+MuxInfo *qmp_query_mux(Error **errp)
+{
+    QemuOpts *opts = QTAILQ_FIRST(&qemu_mux_opts.head);
+    MuxInfo *info;
+    const char *obj;
+    const char *path;
+
+    info = g_malloc0(sizeof(*info));
+
+    if (!display) {
+        info->enabled = false;
+        return info;
+    }
+
+    info->enabled = true;
+    obj = qemu_opt_get(opts, "dbus-object");
+    path = qemu_opt_get(opts, "dbus-path");
+
+    info->obj = strdup(obj);
+    info->path = strdup(path);
+
+    return info;
+}
+
+
 void mux_qemu_display_update(DisplayChangeListener *dcl,
         int x, int y, int w, int h)
 {

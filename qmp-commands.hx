@@ -3321,6 +3321,41 @@ EQMP
     },
 
 SQMP
+query-mux
+---------
+
+Show RDPMux information
+
+Return a json-object with current RDPMux confiration information.
+
+The main json-object contains the following:
+
+    "enabled": true or false
+    "obj": The DBus object of the RDPMux server
+    "path": The DBus path of the RDPMux server
+
+Example:
+
+-> { "execute": "query-mux" }
+<- {
+      "return": {
+          "enabled": true,
+          "obj": "org.RDPMux.RDPMux",
+          "path": "/org/RDPMux/RDPMux"
+      }
+   }
+
+EQMP
+
+#if defined(CONFIG_MUX)
+    {
+        .name = "query-mux",
+        .args_type = "",
+        .mhandler.cmd_new = qmp_marshal_query_mux,
+    },
+#endif
+
+SQMP
 query-spice
 -----------
 

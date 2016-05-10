@@ -1219,6 +1219,34 @@
 { 'command': 'query-spice', 'returns': 'SpiceInfo' }
 
 ##
+# @MuxInfo
+#
+# INformation about the RDPMux connection.
+#
+# @enabled: Whether RDPMux support is enabled. 
+#
+# @obj: DBus object of the RDPMux server.
+#
+# @path: DBus path of the RDPMux server.
+#
+# Since: 2.6.0
+##
+{ 'struct': 'MuxInfo',
+  'data': {'enabled': 'bool', 'obj': 'str', 'path': 'str'}}
+
+
+##
+# @query-mux
+#
+# Returns information about the RDPMux connection
+#
+# Returns: @MuxInfo
+#
+# Since: 2.6.0
+##
+{ 'command': 'query-mux', 'returns': 'MuxInfo' }
+
+##
 # @BalloonInfo:
 #
 # Information about the guest balloon device.

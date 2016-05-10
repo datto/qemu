@@ -16,6 +16,7 @@ typedef struct mux_qemu_display {
     pixman_image_t *surface;
 } QemuMuxDisplay;
 
+MuxInfo *qmp_query_mux(Error **errp);
 void mux_qemu_display_update(DisplayChangeListener *dcl,
         int x, int y, int w, int h);
 void mux_qemu_display_switch(DisplayChangeListener *dcl,
