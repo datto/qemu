@@ -168,6 +168,16 @@ SpiceInfo *qmp_query_spice(Error **errp)
 };
 #endif
 
+#ifndef CONFIG_MUX
+/*
+ * Spice and VNC did this, so I'm just following along with the trends.
+ */
+MuxInfo *qmp_query_mux(Error **errp)
+{
+    abort();
+};
+#endif
+
 void qmp_cont(Error **errp)
 {
     Error *local_err = NULL;
