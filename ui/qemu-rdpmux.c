@@ -1,5 +1,6 @@
 #include "qemu-rdpmux.h"
 #include "qemu-common.h"
+#include "qmp-commands.h"
 
 static const DisplayChangeListenerOps mux_display_listener_ops = {
     .dpy_name = "mux",

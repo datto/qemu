@@ -4030,6 +4030,7 @@ int main(int argc, char **argv, char **envp)
                     exit(1);
                 }
                 using_mux = true;
+                display_remote++;
                 break;
             default:
                 os_parse_cmd_args(popt->index, optarg);
