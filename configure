@@ -3946,7 +3946,8 @@ fi
 if test "$mux" != "no"; then
     cat > $TMPC << EOF
 #include <rdpmux.h>
-int main() { MuxDisplay *d = mux_init_display_struct(); return 0; }
+#define TEST_UUID "882c0e3d-0280-4a70-a20d-9c3308f7e912"
+int main() { MuxDisplay *d = mux_init_display_struct(TEST_UUID); return 0; }
 EOF
     mux_cflags=$($pkg_config --cflags librdpmux 2>/dev/null)
     mux_libs=$($pkg_config --libs librdpmux 2>/dev/null)
