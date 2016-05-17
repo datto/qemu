@@ -1,6 +1,7 @@
 #include "qemu-rdpmux.h"
 #include "qemu-common.h"
 #include "qmp-commands.h"
+#include "sysemu/sysemu.h"
 
 static const DisplayChangeListenerOps mux_display_listener_ops = {
     .dpy_name = "mux",
@@ -177,12 +178,26 @@ static void *mux_qemu_out_loop(void *arg)
 void mux_qemu_init(void)
 {
     QemuThread threads[3];
+    const char *uuid_str;
+    char uuid[64];
+
+    if (qemu_uuid_set) {
+        snprintf(uuid, sizeof(uuid), UUID_FMT, qemu_uuid[0], qemu_uuid[1],
+                qemu_uuid[2], qemu_uuid[3], qemu_uuid[4], qemu_uuid[5],
+                qemu_uuid[6], qemu_uuid[7], qemu_uuid[8], qemu_uuid[9],
+                qemu_uuid[10], qemu_uuid[11], qemu_uuid[12], qemu_uuid[13],
+                qemu_uuid[14], qemu_uuid[15]);
+        uuid_str = g_strdup(uuid);
+    } else {
+        uuid_str = UUID_NONE;
+    }
     int id = g_random_int_range(0, INT_MAX);
+
     QemuConsole *con;
     int i;
     display = g_malloc0(sizeof(QemuMuxDisplay));
 
-    display->s = mux_init_display_struct();
+    display->s = mux_init_display_struct(uuid_str);
     mux_register_event_callbacks(mux_display_ops);
 
     for (i = 0; ; i++) {
