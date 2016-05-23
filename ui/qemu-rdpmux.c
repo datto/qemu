@@ -76,6 +76,7 @@ void mux_qemu_display_switch(DisplayChangeListener *dcl,
 
 void mux_qemu_display_refresh(DisplayChangeListener *dcl)
 {
+    graphic_hw_update(display->dcl.con);
     mux_display_refresh();
 }
 
@@ -182,6 +183,7 @@ void mux_qemu_init(void)
     char uuid[64];
 
     if (qemu_uuid_set) {
+        printf("UUID has been set!\n");
         snprintf(uuid, sizeof(uuid), UUID_FMT, qemu_uuid[0], qemu_uuid[1],
                 qemu_uuid[2], qemu_uuid[3], qemu_uuid[4], qemu_uuid[5],
                 qemu_uuid[6], qemu_uuid[7], qemu_uuid[8], qemu_uuid[9],
@@ -189,10 +191,12 @@ void mux_qemu_init(void)
                 qemu_uuid[14], qemu_uuid[15]);
         uuid_str = g_strdup(uuid);
     } else {
+        printf("UUID was not set, defaulting to NONE\n");
         uuid_str = UUID_NONE;
     }
     int id = g_random_int_range(0, INT_MAX);
 
+    printf("UUID of the VM is %s\n", uuid_str);
     QemuConsole *con;
     int i;
     display = g_malloc0(sizeof(QemuMuxDisplay));
