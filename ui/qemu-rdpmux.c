@@ -115,6 +115,7 @@ static void mux_qemu_mouse_buttons(uint32_t x, uint32_t y, uint32_t flags)
         break;
     case 0x2000: /* right mouse up */
         qemu_input_queue_btn(con, INPUT_BUTTON_RIGHT, 0);
+        break;
     case 0xC000: /* middle mouse down */
         qemu_input_queue_btn(con, INPUT_BUTTON_MIDDLE, 1);
         break;
