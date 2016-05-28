@@ -98,6 +98,7 @@ static void mux_qemu_mouse_move(uint32_t x, uint32_t y)
     qemu_input_queue_abs(con, INPUT_AXIS_Y, y,
             pixman_image_get_height(display->surface));
     qemu_input_event_sync();
+    printf("QEMU: Queued mouse move to coordinate %dx%d\n", x, y);
 }
 
 static void mux_qemu_mouse_buttons(uint32_t x, uint32_t y, uint32_t flags)
@@ -106,20 +107,27 @@ static void mux_qemu_mouse_buttons(uint32_t x, uint32_t y, uint32_t flags)
     switch (flags) {
     case 0x9000: /* left mouse down */
         qemu_input_queue_btn(con, INPUT_BUTTON_LEFT, 1);
+        printf("QEMU: Left mouse down event queued\n");
         break;
     case 0x1000: /* left mouse up */
         qemu_input_queue_btn(con, INPUT_BUTTON_LEFT, 0);
+        printf("QEMU: Left mouse up event queued\n");
         break;
     case 0xA000: /* right mouse down */
         qemu_input_queue_btn(con, INPUT_BUTTON_RIGHT, 1);
+        printf("QEMU: Right mouse down event queued\n");
         break;
     case 0x2000: /* right mouse up */
         qemu_input_queue_btn(con, INPUT_BUTTON_RIGHT, 0);
+        printf("QEMU: Right mouse up event queued\n");
+        break;
     case 0xC000: /* middle mouse down */
         qemu_input_queue_btn(con, INPUT_BUTTON_MIDDLE, 1);
+        printf("QEMU: Middle mouse down event queued\n");
         break;
     case 0x4000: /* middle mouse up */
         qemu_input_queue_btn(con, INPUT_BUTTON_MIDDLE, 0);
+        printf("QEMU: Middle mouse up event queued\n");
         break;
     default:
         printf("ERROR: Invalid mouse button input: 0x%X\n", flags);
