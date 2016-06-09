@@ -14,6 +14,7 @@ typedef struct mux_qemu_display {
     MuxDisplay *s;
     DisplayChangeListener dcl;
     pixman_image_t *surface;
+    Notifier powerdown_notifier;
 } QemuMuxDisplay;
 
 void mux_qemu_display_update(DisplayChangeListener *dcl,

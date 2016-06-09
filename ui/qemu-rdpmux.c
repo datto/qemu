@@ -36,6 +36,14 @@ static QemuOptsList qemu_mux_opts = {
 
 static QemuMuxDisplay *display;
 
+static void qemu_mux_powerdown_req(Notifier *notifier, void *opaque)
+{
+    QemuMuxDisplay *display = NULL;
+    display = container_of(notifier, QemuMuxDisplay, powerdown_notifier);
+
+    mux_cleanup(display->s);
+}
+
 MuxInfo *qmp_query_mux(Error **errp)
 {
     QemuOpts *opts = QTAILQ_FIRST(&qemu_mux_opts.head);
@@ -221,6 +229,7 @@ void mux_qemu_init(void)
 
     display->dcl.ops = &mux_display_listener_ops;
     display->dcl.con = con;
+    display->powerdown_notifier.notify = qemu_mux_powerdown_req;
 
     char *path = g_malloc0(sizeof(char) * 4096);
 
@@ -239,6 +248,7 @@ void mux_qemu_init(void)
         goto socket_path_cleanup;
     }
 
+    qemu_register_powerdown_notifier(&display->powerdown_notifier);
     register_displaychangelistener(&display->dcl);
 
     qemu_thread_create(&threads[0], "mux_qemu_in_loop", mux_qemu_in_loop,
