@@ -14,12 +14,15 @@ typedef struct mux_qemu_display {
     MuxDisplay *s;
     DisplayChangeListener dcl;
     pixman_image_t *surface;
+    Notifier powerdown_notifier;
 } QemuMuxDisplay;
 
 void mux_qemu_display_update(DisplayChangeListener *dcl,
         int x, int y, int w, int h);
 void mux_qemu_display_switch(DisplayChangeListener *dcl,
         DisplaySurface *ds);
+void mux_qemu_display_copy(DisplayChangeListener *dcl,
+        int src_x, int src_y, int dest_x, int dest_y, int w, int h);
 void mux_qemu_display_refresh(DisplayChangeListener *dcl);
 void mux_qemu_mouse_set(DisplayChangeListener *dcl, int x, int y, int on);
 void mux_qemu_cursor_define(DisplayChangeListener *dcl, QEMUCursor *c);

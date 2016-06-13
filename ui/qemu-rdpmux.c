@@ -7,6 +7,7 @@ static const DisplayChangeListenerOps mux_display_listener_ops = {
     .dpy_name = "mux",
     .dpy_gfx_update = mux_qemu_display_update,
     .dpy_gfx_switch = mux_qemu_display_switch,
+    .dpy_gfx_copy = mux_qemu_display_copy,
     .dpy_gfx_check_format = qemu_pixman_check_format,
     .dpy_refresh = mux_qemu_display_refresh,
     .dpy_mouse_set = mux_qemu_mouse_set,
@@ -35,6 +36,15 @@ static QemuOptsList qemu_mux_opts = {
 };
 
 static QemuMuxDisplay *display;
+
+static void qemu_mux_powerdown_req(Notifier *notifier, void *opaque)
+{
+    printf("QEMU: qemu_mux_powerdown_req\n");
+    QemuMuxDisplay *display = NULL;
+    display = container_of(notifier, QemuMuxDisplay, powerdown_notifier);
+
+    mux_cleanup(display->s);
+}
 
 MuxInfo *qmp_query_mux(Error **errp)
 {
@@ -65,6 +75,14 @@ void mux_qemu_display_update(DisplayChangeListener *dcl,
         int x, int y, int w, int h)
 {
     mux_display_update(x, y, w, h);
+}
+
+void mux_qemu_display_copy(DisplayChangeListener *dcl,
+        int src_x, int src_y, int dest_x, int dest_y, int w, int h)
+{
+    printf("QEMU: mux_qemu_display_copy\n");
+    mux_display_update(src_x, src_y, w, h);
+    mux_display_update(dest_x, dest_y, w, h);
 }
 
 void mux_qemu_display_switch(DisplayChangeListener *dcl,
@@ -98,7 +116,6 @@ static void mux_qemu_mouse_move(uint32_t x, uint32_t y)
     qemu_input_queue_abs(con, INPUT_AXIS_Y, y,
             pixman_image_get_height(display->surface));
     qemu_input_event_sync();
-    printf("QEMU: Queued mouse move to coordinate %dx%d\n", x, y);
 }
 
 static void mux_qemu_mouse_buttons(uint32_t x, uint32_t y, uint32_t flags)
@@ -107,27 +124,21 @@ static void mux_qemu_mouse_buttons(uint32_t x, uint32_t y, uint32_t flags)
     switch (flags) {
     case 0x9000: /* left mouse down */
         qemu_input_queue_btn(con, INPUT_BUTTON_LEFT, 1);
-        printf("QEMU: Left mouse down event queued\n");
         break;
     case 0x1000: /* left mouse up */
         qemu_input_queue_btn(con, INPUT_BUTTON_LEFT, 0);
-        printf("QEMU: Left mouse up event queued\n");
         break;
     case 0xA000: /* right mouse down */
         qemu_input_queue_btn(con, INPUT_BUTTON_RIGHT, 1);
-        printf("QEMU: Right mouse down event queued\n");
         break;
     case 0x2000: /* right mouse up */
         qemu_input_queue_btn(con, INPUT_BUTTON_RIGHT, 0);
-        printf("QEMU: Right mouse up event queued\n");
         break;
     case 0xC000: /* middle mouse down */
         qemu_input_queue_btn(con, INPUT_BUTTON_MIDDLE, 1);
-        printf("QEMU: Middle mouse down event queued\n");
         break;
     case 0x4000: /* middle mouse up */
         qemu_input_queue_btn(con, INPUT_BUTTON_MIDDLE, 0);
-        printf("QEMU: Middle mouse up event queued\n");
         break;
     default:
         printf("ERROR: Invalid mouse button input: 0x%X\n", flags);
@@ -191,7 +202,6 @@ void mux_qemu_init(void)
     char uuid[64];
 
     if (qemu_uuid_set) {
-        printf("UUID set by QEMU command line!\n");
         snprintf(uuid, sizeof(uuid), UUID_FMT, qemu_uuid[0], qemu_uuid[1],
                 qemu_uuid[2], qemu_uuid[3], qemu_uuid[4], qemu_uuid[5],
                 qemu_uuid[6], qemu_uuid[7], qemu_uuid[8], qemu_uuid[9],
@@ -221,6 +231,7 @@ void mux_qemu_init(void)
 
     display->dcl.ops = &mux_display_listener_ops;
     display->dcl.con = con;
+    display->powerdown_notifier.notify = qemu_mux_powerdown_req;
 
     char *path = g_malloc0(sizeof(char) * 4096);
 
@@ -239,6 +250,7 @@ void mux_qemu_init(void)
         goto socket_path_cleanup;
     }
 
+    qemu_register_powerdown_notifier(&display->powerdown_notifier);
     register_displaychangelistener(&display->dcl);
 
     qemu_thread_create(&threads[0], "mux_qemu_in_loop", mux_qemu_in_loop,
