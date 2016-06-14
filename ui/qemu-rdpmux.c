@@ -94,7 +94,7 @@ void mux_qemu_display_switch(DisplayChangeListener *dcl,
 
 void mux_qemu_display_refresh(DisplayChangeListener *dcl)
 {
-    graphic_hw_update();
+    graphic_hw_update(display->dcl.con);
     mux_display_refresh();
 }
 
