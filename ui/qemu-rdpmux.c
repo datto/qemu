@@ -158,6 +158,8 @@ void mux_qemu_receive_mouse(uint32_t mouse_x, uint32_t mouse_y, uint32_t flags)
 
 void mux_qemu_receive_kb(uint32_t keycode, uint32_t flags)
 {
+    printf("Received keyboard input - keycode: %#06x flags: %#06x\n",
+            keycode, flags);
     if (flags == 0x4000 || flags == 0x4100) {
         if (keycode == 0x5b || keycode == 0x5c) {
             qemu_input_event_send_key_qcode(NULL, Q_KEY_CODE_META_L, true);
