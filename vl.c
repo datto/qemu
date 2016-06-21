@@ -2690,6 +2690,7 @@ static gint machine_class_cmp(gconstpointer a, gconstpointer b)
 
 void qemu_add_exit_notifier(Notifier *notify)
 {
+    printf("QEMU: qemu_add_exit_notifier\n");
     notifier_list_add(&exit_notifiers, notify);
 }
 

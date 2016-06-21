@@ -37,12 +37,9 @@ static QemuOptsList qemu_mux_opts = {
 
 static QemuMuxDisplay *display;
 
-static void qemu_mux_powerdown_req(Notifier *notifier, void *opaque)
+static void qemu_mux_cleanup(Notifier *n, void *opaque)
 {
-    printf("QEMU: qemu_mux_powerdown_req\n");
-    QemuMuxDisplay *display = NULL;
-    display = container_of(notifier, QemuMuxDisplay, powerdown_notifier);
-
+    printf("QEMU: qemu_mux_cleanup\n");
     mux_cleanup(display->s);
 }
 
@@ -80,7 +77,6 @@ void mux_qemu_display_update(DisplayChangeListener *dcl,
 void mux_qemu_display_copy(DisplayChangeListener *dcl,
         int src_x, int src_y, int dest_x, int dest_y, int w, int h)
 {
-    printf("QEMU: mux_qemu_display_copy\n");
     mux_display_update(src_x, src_y, w, h);
     mux_display_update(dest_x, dest_y, w, h);
 }
@@ -179,12 +175,6 @@ void mux_qemu_receive_kb(uint32_t keycode, uint32_t flags)
     }
 }
 
-static void *mux_qemu_update_loop(void *arg)
-{
-    mux_display_buffer_update_loop(arg);
-    return NULL;
-}
-
 static void *mux_qemu_in_loop(void *arg)
 {
     mux_mainloop(arg);
@@ -199,7 +189,7 @@ static void *mux_qemu_out_loop(void *arg)
 
 void mux_qemu_init(void)
 {
-    QemuThread threads[3];
+    QemuThread threads[2];
     const char *uuid_str;
     char uuid[64];
 
@@ -233,7 +223,6 @@ void mux_qemu_init(void)
 
     display->dcl.ops = &mux_display_listener_ops;
     display->dcl.con = con;
-    display->powerdown_notifier.notify = qemu_mux_powerdown_req;
 
     char *path = g_malloc0(sizeof(char) * 4096);
 
@@ -252,14 +241,13 @@ void mux_qemu_init(void)
         goto socket_path_cleanup;
     }
 
-    qemu_register_powerdown_notifier(&display->powerdown_notifier);
     register_displaychangelistener(&display->dcl);
+    display->exit_notifier.notify = qemu_mux_cleanup;
+    qemu_add_exit_notifier(&display->exit_notifier);
 
     qemu_thread_create(&threads[0], "mux_qemu_in_loop", mux_qemu_in_loop,
             NULL, QEMU_THREAD_DETACHED);
     qemu_thread_create(&threads[1], "mux_qemu_out_loop", mux_qemu_out_loop,
-            NULL, QEMU_THREAD_DETACHED);
-    qemu_thread_create(&threads[2], "buffer_update_loop", mux_qemu_update_loop,
             NULL, QEMU_THREAD_DETACHED);
 
 socket_path_cleanup:
