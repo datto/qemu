@@ -3,12 +3,29 @@
 #include "qmp-commands.h"
 #include "sysemu/sysemu.h"
 
+#define MUX_MIN_REFRESH 3
+#define MUX_MAX_REFRESH 60
+
+static bool mux_qemu_check_format(DisplayChangeListener *dcl, 
+        pixman_format_code_t format)
+{
+    switch (format) {
+    case PIXMAN_x8r8g8b8:
+    case PIXMAN_a8r8g8b8:
+    case PIXMAN_r8g8b8x8:
+    case PIXMAN_r8g8b8a8:
+        return true;
+    default:
+        return false;
+    }
+}
+
 static const DisplayChangeListenerOps mux_display_listener_ops = {
     .dpy_name = "mux",
     .dpy_gfx_update = mux_qemu_display_update,
     .dpy_gfx_switch = mux_qemu_display_switch,
     .dpy_gfx_copy = mux_qemu_display_copy,
-    .dpy_gfx_check_format = qemu_pixman_check_format,
+    .dpy_gfx_check_format = mux_qemu_check_format,
     .dpy_refresh = mux_qemu_display_refresh,
     .dpy_mouse_set = mux_qemu_mouse_set,
     .dpy_cursor_define = mux_qemu_cursor_define,
@@ -91,7 +108,11 @@ void mux_qemu_display_switch(DisplayChangeListener *dcl,
 void mux_qemu_display_refresh(DisplayChangeListener *dcl)
 {
     graphic_hw_update(display->dcl.con);
-    mux_display_refresh();
+    uint32_t framerate = mux_display_refresh();
+    if (framerate > MUX_MIN_REFRESH && framerate < MUX_MAX_REFRESH) {
+        display->dcl.update_interval = framerate;
+    }
+    update_displaychangelistener(&display->dcl, framerate);
 }
 
 void mux_qemu_mouse_set(DisplayChangeListener *dcl, int x, int y, int on)
