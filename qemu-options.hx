@@ -3608,6 +3608,27 @@ Enable KVM full virtualization support. This option is only available
 if KVM support is enabled when compiling.
 ETEXI
 
+DEF("mux", HAS_ARG, QEMU_OPTION_mux, \
+    "-mux [dbus-object=<obj>][,dbus-path=<path>][,port=<port>][,authfile=<authfile>]\n"
+    "      enable RDPMux integration features\n", QEMU_ARCH_ALL)
+STEXI
+@item -mux @var{option}[,@var{option}]
+@findex -mux
+Enable librdpmux integration. This option only makes sense when used with an 
+RDPMux server. Valid options are
+
+@table @option
+
+@item dbus-path=<path>
+The well-known name of the RDPMux server on the system bus.
+
+@item dbus-object=<obj>
+The object path to the main RDPMux dbus object.
+
+@end table
+ETEXI
+
+
 DEF("enable-hax", 0, QEMU_OPTION_enable_hax, \
     "-enable-hax     enable HAX virtualization support\n", QEMU_ARCH_I386)
 STEXI

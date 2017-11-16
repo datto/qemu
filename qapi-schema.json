@@ -6539,3 +6539,35 @@
 # Since 2.9
 ##
 { 'command': 'query-vm-generation-id', 'returns': 'GuidInfo' }
+
+##
+# @MuxInfo:
+#
+# Information about the RDPMux connection.
+#
+# @enabled: Whether RDPMux support is enabled. 
+#
+# @obj: DBus object of the RDPMux server.
+#
+# @path: DBus path of the RDPMux server.
+#
+# @port: Port assignment for the RDP session.
+#
+# @authfile: Absolute path to file containing NLA password hashes.
+#
+# Since: 2.6.0
+##
+{ 'struct': 'MuxInfo',
+  'data': {'enabled': 'bool', 'obj': 'str', 'path': 'str', 'port': 'int',
+           'authfile': 'str'}}
+
+##
+# @query-mux:
+#
+# Returns information about the RDPMux connection
+#
+# Returns: @MuxInfo
+#
+# Since: 2.6.0
+##
+{ 'command': 'query-mux', 'returns': 'MuxInfo' }
