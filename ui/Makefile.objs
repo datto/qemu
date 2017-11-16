@@ -17,6 +17,8 @@ common-obj-$(CONFIG_CURSES) += curses.o
 common-obj-$(CONFIG_VNC) += $(vnc-obj-y)
 common-obj-$(CONFIG_GTK) += gtk.o x_keymap.o
 
+common-obj-$(CONFIG_MUX) += qemu-rdpmux.o
+
 ifeq ($(CONFIG_SDLABI),1.2)
 sdl.mo-objs := sdl.o sdl_zoom.o
 endif

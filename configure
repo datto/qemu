@@ -422,6 +422,7 @@ tcmalloc="no"
 jemalloc="no"
 replication="yes"
 vxhs=""
+mux="no"
 
 supported_cpu="no"
 supported_os="no"
@@ -1312,6 +1313,10 @@ for opt do
   --enable-git-update) git_update=yes
   ;;
   --disable-git-update) git_update=no
+  ;;
+  --disable-mux) mux="no"
+  ;;
+  --enable-mux) mux="yes"
   ;;
   *)
       echo "ERROR: unknown option $opt"
@@ -4304,6 +4309,28 @@ EOF
   fi
 fi
 
+# librdpmux probe
+if test "mux" != "no"; then
+    cat > $TMPC << EOF
+#include <rdpmux.h>
+#define TEST_UUID "882c0e3d-0280-4a70-a20d-9c3308f7e912"
+int main() { MuxDisplay *d = mux_init_display_struct(TEST_UUID); return 0; }
+EOF
+    mux_cflags=$($pkg_config --cflags librdpmux 2>/dev/null)
+    mux_libs=$($pkg_config --libs librdpmux 2>/dev/null)
+    if compile_prog "$mux_cflags" "$mux_libs" ; then
+        mux="yes"
+        libs_softmmu="$libs_softmmu $mux_libs"
+        QEMU_CFLAGS="$QEMU_CFLAGS $mux_cflags"
+    else
+        if test "$mux" = "yes" ; then
+            feature_not_found "mux" \
+                "Install librdpmux-devel"
+        fi
+        mux="no"
+    fi
+fi
+
 # check for smartcard support
 if test "$smartcard" != "no"; then
     if $pkg_config libcacard; then
@@ -5518,6 +5545,7 @@ if have_backend "simple"; then
 echo "Trace output file $trace_file-<pid>"
 fi
 echo "spice support     $spice $(echo_version $spice $spice_protocol_version/$spice_server_version)"
+echo "mux support       $mux"
 echo "rbd support       $rbd"
 echo "xfsctl support    $xfs"
 echo "smartcard support $smartcard"
@@ -5883,6 +5911,9 @@ if test "$gcrypt" = "yes" ; then
   if test "$gcrypt_kdf" = "yes" ; then
     echo "CONFIG_GCRYPT_KDF=y" >> $config_host_mak
   fi
+fi
+if test "$mux" = "yes"; then
+    echo "CONFIG_MUX=y" >> $config_host_mak
 fi
 if test "$nettle" = "yes" ; then
   echo "CONFIG_NETTLE=y" >> $config_host_mak
